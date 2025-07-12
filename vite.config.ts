@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
+  plugins: [react()],
   base: '/Moku_Moku_House/',
   server: {
     port: 3000,
@@ -8,17 +10,6 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
-    rollupOptions: {
-      input: {
-        main: './index.html'
-      }
-    }
-  },
-  resolve: {
-    alias: {
-      'react': 'react',
-      'react-dom': 'react-dom'
-    }
+    sourcemap: false
   }
 });
