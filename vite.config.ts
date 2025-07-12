@@ -10,13 +10,15 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     rollupOptions: {
-      external: [],
-      output: {
-        manualChunks: undefined
+      input: {
+        main: './index.html'
       }
     }
   },
-  optimizeDeps: {
-    include: ['react', 'react-dom']
+  resolve: {
+    alias: {
+      'react': 'react',
+      'react-dom': 'react-dom'
+    }
   }
 });
