@@ -51,9 +51,366 @@
         }
     </script>
 
+    <!-- React CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body class="bg-ivory text-coffee-dark font-sans overflow-x-hidden">
     <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        
+        // 定数
+        const SITE_CONFIG = {
+            title: 'Moku Moku House',
+            heroTitle: 'Welcome to Moku Moku House',
+            heroSubtitle: 'クリエイターが静かに、もくもくと創作する場所',
+            aboutTitle: 'What is Moku Moku House?',
+            aboutDescription: `Moku Moku Houseは、デザイナー、イラストレーター、プログラマー、ライターなど、
+あらゆる分野のクリエイターが集まる特別な場所です。
+
+静かなカフェのような心地よい空間で、それぞれが「もくもく」と集中して
+創作活動に取り組むことができるコミュニティです。
+
+一人で作業しながらも、同じ志を持つクリエイター仲間の存在を感じられる、
+そんな温かくて居心地の良い空間を提供しています。`,
+            mokopiTitle: 'Meet Mokopi',
+            mokopiDescription: `こんにちは！私はもこぴです 🐑
+
+Moku Moku Houseのマスコットとして、
+みなさんの創作活動をそっと見守っています。
+
+集中したいときは静かに、
+息抜きが必要なときは一緒にほっこりしましょう。
+
+クリエイターのみなさんが心地よく過ごせるよう、
+いつでもお手伝いしますよ！`,
+            worksTitle: "Creator's Works",
+            gameTitle: "A New Game is Coming Soon!",
+            gameDescription: "新しいミニゲームを準備中です！お楽しみに！"
+        };
+
+        const NAVIGATION_ITEMS = [
+            { id: 'about', label: 'About' },
+            { id: 'mokopi', label: 'Mokopi' },
+            { id: 'works', label: 'Works' },
+            { id: 'game', label: 'Game' }
+        ];
+
+        // アプリケーション
+        function App() {
+            const [activeSection, setActiveSection] = useState('home');
+            const [mokopiInteracted, setMokopiInteracted] = useState(false);
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+            const [isScrolled, setIsScrolled] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => {
+                    setIsScrolled(window.scrollY > 50);
+                    
+                    const sections = ['home', 'about', 'mokopi', 'works', 'game'];
+                    const scrollPosition = window.scrollY + 120;
+
+                    for (const sectionId of sections) {
+                        const element = document.getElementById(sectionId);
+                        if (element) {
+                            const { offsetTop, offsetHeight } = element;
+                            if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+                                setActiveSection(sectionId);
+                                break;
+                            }
+                        }
+                    }
+                };
+
+                window.addEventListener('scroll', handleScroll);
+                handleScroll();
+
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const scrollToSection = (sectionId) => {
+                if (sectionId === 'home') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    const element = document.getElementById(sectionId);
+                    if (element) {
+                        const headerHeight = 80;
+                        const elementPosition = element.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+                        
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+                setIsMenuOpen(false);
+            };
+
+            return (
+                <div className="min-h-screen">
+                    {/* Header */}
+                    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+                        isScrolled 
+                            ? 'bg-ivory/90 backdrop-blur-md shadow-lg' 
+                            : 'bg-transparent'
+                    }`}>
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-20">
+                                <button
+                                    onClick={() => scrollToSection('home')}
+                                    className="font-serif text-2xl font-bold text-coffee-dark hover:text-vivid-pink transition-colors duration-300"
+                                >
+                                    {SITE_CONFIG.title}
+                                </button>
+
+                                <nav className="hidden md:flex space-x-8">
+                                    {NAVIGATION_ITEMS.map((item) => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => scrollToSection(item.id)}
+                                            className={`relative font-medium transition-all duration-300 hover:text-vivid-pink ${
+                                                activeSection === item.id ? 'text-vivid-pink' : 'text-coffee-dark'
+                                            }`}
+                                        >
+                                            {item.label}
+                                            {activeSection === item.id && (
+                                                <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-vivid-pink transform origin-left transition-all duration-300" />
+                                            )}
+                                        </button>
+                                    ))}
+                                </nav>
+
+                                <button
+                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                    className="md:hidden text-coffee-dark hover:text-vivid-pink transition-colors duration-300 p-2"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                                              d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Mobile Menu */}
+                        {isMenuOpen && (
+                            <div className="fixed inset-0 z-40 md:hidden">
+                                <div className="fixed inset-0 bg-coffee-dark/50 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)} />
+                                <div className="fixed top-0 right-0 h-full w-80 max-w-full bg-ivory shadow-xl">
+                                    <div className="pt-24 px-8">
+                                        <nav className="space-y-8">
+                                            {NAVIGATION_ITEMS.map((item) => (
+                                                <button
+                                                    key={item.id}
+                                                    onClick={() => scrollToSection(item.id)}
+                                                    className={`block w-full text-left font-medium text-xl transition-colors duration-300 hover:text-vivid-pink ${
+                                                        activeSection === item.id ? 'text-vivid-pink' : 'text-coffee-dark'
+                                                    }`}
+                                                >
+                                                    {item.label}
+                                                </button>
+                                            ))}
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </header>
+
+                    {/* Hero Section */}
+                    <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden">
+                        <div 
+                            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                            style={{
+                                backgroundImage: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><radialGradient id="latte" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="%23f8f4e9"/><stop offset="30%" stop-color="%23e0f7fa"/><stop offset="70%" stop-color="%23d2b48c"/><stop offset="100%" stop-color="%23d2b48c"/></radialGradient></defs><rect width="1200" height="800" fill="url(%23latte)"/></svg>')`
+                            }}
+                        />
+                        <div className="absolute inset-0 bg-ivory/40 backdrop-blur-sm" />
+                        
+                        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+                            <h1 className="font-serif text-5xl md:text-7xl font-bold text-coffee-dark mb-6 opacity-0 animate-fade-in-up">
+                                {SITE_CONFIG.heroTitle}
+                            </h1>
+                            <p className="text-xl md:text-2xl text-coffee-mid mb-8 opacity-0 animate-fade-in-up leading-relaxed"
+                               style={{animationDelay: '0.5s'}}>
+                                {SITE_CONFIG.heroSubtitle}
+                            </p>
+                        </div>
+
+                        <button
+                            onClick={() => scrollToSection('about')}
+                            className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-coffee-dark/60 hover:text-vivid-pink transition-colors duration-300 animate-bounce-slow"
+                        >
+                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                    </section>
+
+                    {/* About Section */}
+                    <section id="about" className="relative py-20 lg:py-32 bg-pastel-blue overflow-hidden">
+                        <div className="absolute bottom-0 left-0 w-full overflow-hidden">
+                            <svg className="relative block w-full h-20" viewBox="0 0 1200 100" preserveAspectRatio="none">
+                                <polygon fill="#f8f4e9" points="0,100 1200,100 1200,0 0,60"></polygon>
+                            </svg>
+                        </div>
+                        <div className="relative z-10 max-w-6xl mx-auto px-4">
+                            <div className="text-center">
+                                <div className="flex items-center justify-center mb-12">
+                                    <div className="flex-1 h-px bg-coffee-light/30 max-w-32"></div>
+                                    <h2 className="font-serif text-4xl md:text-5xl font-bold text-coffee-dark mx-6 md:mx-8 text-center">
+                                        {SITE_CONFIG.aboutTitle}
+                                    </h2>
+                                    <div className="flex-1 h-px bg-coffee-light/30 max-w-32"></div>
+                                </div>
+                                
+                                <div className="max-w-4xl mx-auto">
+                                    {SITE_CONFIG.aboutDescription.split('\n\n').map((paragraph, index) => (
+                                        <p key={index} className="text-lg md:text-xl text-coffee-dark/80 leading-relaxed mb-6 last:mb-0">
+                                            {paragraph}
+                                        </p>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Mokopi Section */}
+                    <section id="mokopi" className="py-20 lg:py-32 bg-ivory">
+                        <div className="max-w-6xl mx-auto px-4">
+                            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                                <div className="text-center lg:text-left order-2 lg:order-1">
+                                    <h2 className="font-serif text-5xl md:text-6xl font-bold text-coffee-dark mb-6">
+                                        {SITE_CONFIG.mokopiTitle}
+                                    </h2>
+                                    <div className="space-y-4">
+                                        {SITE_CONFIG.mokopiDescription.split('\n\n').map((paragraph, index) => (
+                                            <p key={index} className="text-lg text-coffee-dark/80 leading-relaxed">
+                                                {paragraph}
+                                            </p>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="text-center order-1 lg:order-2">
+                                    <div
+                                        className={`relative inline-block transition-all duration-500 cursor-pointer ${
+                                            mokopiInteracted ? 'transform rotate-0' : 'transform rotate-2'
+                                        }`}
+                                        onMouseEnter={() => setMokopiInteracted(true)}
+                                        onMouseLeave={() => setMokopiInteracted(false)}
+                                        onClick={() => setMokopiInteracted(!mokopiInteracted)}
+                                    >
+                                        <div
+                                            className={`absolute inset-0 rounded-2xl transition-all duration-500 pointer-events-none ${
+                                                mokopiInteracted 
+                                                    ? 'bg-gradient-to-br from-vivid-pink/40 to-vivid-green/40 blur-xl scale-110' 
+                                                    : 'bg-gradient-to-br from-vivid-pink/20 to-vivid-green/20 blur-lg scale-105'
+                                            }`}
+                                        />
+                                        
+                                        <div className="relative bg-white rounded-2xl p-8 lg:p-12 shadow-lg">
+                                            <div className="w-48 h-48 lg:w-56 lg:h-56 mx-auto bg-gradient-to-br from-vivid-pink/10 to-vivid-green/10 rounded-full flex items-center justify-center mb-6">
+                                                <span className="text-7xl lg:text-8xl transition-all duration-300">
+                                                    {mokopiInteracted ? '😉' : '😊'}
+                                                </span>
+                                            </div>
+                                            <h3 className="font-serif text-2xl lg:text-3xl font-bold text-coffee-dark">
+                                                Mokopi
+                                            </h3>
+                                            <p className="text-coffee-mid/70 mt-2">
+                                                Moku Moku House Mascot
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Works Section */}
+                    <section className="py-20 lg:py-32 bg-pastel-blue transform skew-y-2">
+                        <div id="works" className="max-w-7xl mx-auto px-4 transform -skew-y-2">
+                            <div className="text-center mb-16">
+                                <div className="flex items-center justify-center mb-4">
+                                    <div className="flex-1 h-px bg-coffee-light/30 max-w-48"></div>
+                                    <h2 className="font-serif text-4xl md:text-5xl font-bold text-coffee-dark mx-6 md:mx-8 text-center">
+                                        {SITE_CONFIG.worksTitle}
+                                    </h2>
+                                    <div className="flex-1 h-px bg-coffee-light/30 max-w-48"></div>
+                                </div>
+                                <p className="text-lg text-coffee-dark/70 max-w-2xl mx-auto">
+                                    Moku Moku Houseのクリエイターたちによる素晴らしい作品をご紹介します
+                                </p>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {[1,2,3].map((i) => (
+                                    <div key={i} className="group bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:transform hover:-translate-y-2 border-t-4 border-t-vivid-pink">
+                                        <div className="relative overflow-hidden h-48">
+                                            <div className="w-full h-full bg-gradient-to-br from-vivid-pink/20 to-vivid-green/20 flex items-center justify-center">
+                                                <span className="text-coffee-dark font-bold text-lg">Sample Work {i}</span>
+                                            </div>
+                                        </div>
+                                        <div className="p-6">
+                                            <h3 className="text-xl font-bold text-coffee-dark mb-2 font-serif group-hover:text-vivid-pink transition-colors duration-300">
+                                                Creative Project {i}
+                                            </h3>
+                                            <p className="text-sm text-coffee-mid/80 mb-3">
+                                                by Creator {i}
+                                            </p>
+                                            <p className="text-coffee-dark/70 leading-relaxed text-sm">
+                                                クリエイティブな作品の説明がここに入ります。
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Game Section */}
+                    <section id="game" className="py-20 lg:py-32 bg-ivory">
+                        <div className="max-w-4xl mx-auto px-4">
+                            <div className="text-center">
+                                <div className="border-2 border-dashed border-coffee-light rounded-3xl p-12 lg:p-16">
+                                    <svg className="w-16 h-16 lg:w-20 lg:h-20 mx-auto text-coffee-light mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4v1m4-1v1m-4-8a9 9 0 019 9v1a2 2 0 01-2 2H7a2 2 0 01-2-2v-1a9 9 0 019-9z" />
+                                    </svg>
+                                    <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-coffee-dark mb-4">
+                                        {SITE_CONFIG.gameTitle}
+                                    </h2>
+                                    <p className="text-lg lg:text-xl text-coffee-dark/70 leading-relaxed">
+                                        {SITE_CONFIG.gameDescription}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Footer */}
+                    <footer className="bg-coffee-mid text-ivory py-12">
+                        <div className="max-w-6xl mx-auto px-4 text-center">
+                            <h3 className="font-serif text-2xl lg:text-3xl font-bold mb-4">
+                                {SITE_CONFIG.title}
+                            </h3>
+                            <p className="text-ivory/80 mb-4">
+                                クリエイターが静かに、もくもくと創作する場所
+                            </p>
+                            <p className="text-ivory/60 text-sm">
+                                © 2024 Moku Moku House. All rights reserved.
+                            </p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
 </body>
 </html>
